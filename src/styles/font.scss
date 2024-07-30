@@ -1,0 +1,57 @@
+@font-face {
+  font-family: "DIN"; //重命名字体名
+  src: url("../assets/fonts/DIN/DIN-Regular.ttf");
+  font-weight: normal;
+  font-style: normal;
+  // unicode-range: U+30-39;
+}
+
+@font-face {
+  font-family: "Roboto"; //重命名字体名
+  src: url("../assets/fonts/Roboto/Roboto-Regular.ttf");
+  font-weight: normal;
+  font-style: normal;
+  unicode-range: U+30-39, U+61-7a, U+41-5a;
+}
+
+@font-face {
+  font-family: "SourceHanSansCN"; //重命名字体名
+  src: url("../assets/fonts/SourceHanSansCN/SourceHanSansCN-Regular.otf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "YouSheBiaoTiHei"; //重命名字体名
+  src: url("../assets/fonts/YouSheBiaoTiHei/YouSheBiaoTiHei-2.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "ZhenyanGB"; //重命名字体名
+  src: url("../assets/fonts/ZhenyanGB/ZhenyanGB.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "PingFangRegular"; //重命名字体名
+  src: url("../assets/fonts/PingFangRegular/PingFang-Regular.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "PingFangMedium"; //重命名字体名
+  src: url("../assets/fonts/PingFangMedium/PingFang Medium.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "AlibabaPuHuiTiMedium"; //重命名字体名
+  src: url("../assets/fonts/Alibaba-PuHuiTi/Alibaba-PuHuiTi-Medium.otf");
+  font-weight: normal;
+  font-style: normal;
+}
