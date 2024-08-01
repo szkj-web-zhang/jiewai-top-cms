@@ -11,10 +11,11 @@ const router = createRouter({
 router.beforeEach((_to, _from, next) => {
   const userStore = useUserStore();
   const factor = window.location.pathname.includes("jiewai-top-cms");
-  if (factor && userStore.token) return next();
-  if (!userStore.token) {
+  if (factor && userStore.satoken) return next();
+  if (!userStore.satoken) {
     window.location.href = "/login";
     window.localStorage.removeItem("jiewai-top-cms-tab");
+    window.localStorage.removeItem("jiewai-top-cms-global");
     next();
   }
 });

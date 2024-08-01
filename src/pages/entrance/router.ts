@@ -25,12 +25,12 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore();
   if (to.path.toLocaleLowerCase() === "/login") {
-    if (userStore.token) {
+    if (userStore.satoken) {
       return next(from.fullPath);
     }
     return next();
   }
-  if (!userStore.token) return next({ path: "/login", replace: true });
+  if (!userStore.satoken) return next({ path: "/login", replace: true });
   next();
 });
 

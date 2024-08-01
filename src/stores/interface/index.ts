@@ -1,4 +1,6 @@
+import { Login } from "@/api/interface";
+
 export interface UserState {
-  token: string;
-  userInfo: { name: string };
+  satoken: string;
+  userInfo: Login.UserInfoRes | null;
 }

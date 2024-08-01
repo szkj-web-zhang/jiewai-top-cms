@@ -11,6 +11,10 @@ import { useUserStore } from "@/stores/modules/user";
 import { ElMessage } from "element-plus";
 import { checkStatus } from "./helper/status-check";
 import { ResultData } from "./interface";
+import {
+  showFullScreenLoading,
+  tryHideFullScreenLoading
+} from "@/utils/screen-loader";
 
 export interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   loading?: boolean;
@@ -35,12 +39,17 @@ class RequestHttp {
     this.service.interceptors.request.use(
       (config: CustomAxiosRequestConfig) => {
         const userStore = useUserStore();
+        // 控制重复请求是否取消，
         config.cancel ??= true;
         config.cancel && axiosCanceler.addPending(config);
+        // 控制请求是否需要显示loading
         config.loading ??= true;
-        config.loading && console.log("我正在loading");
+        config.loading && showFullScreenLoading();
         if (config.headers && typeof config.headers.set === "function") {
-          config.headers.set("noauth", userStore.token);
+          config.headers.set(
+            "satoken",
+            userStore.satoken ? userStore.satoken : ""
+          );
         }
         return config;
       },
@@ -54,31 +63,31 @@ class RequestHttp {
         const { data, config } = response;
         const userStore = useUserStore();
         axiosCanceler.removePending(config);
-        // config.loading && console.log("loading结束了");
-        console.log("response", data);
-        // if (data.code == ResultEnum.OVERDUE) {
-        //   userStore.setToken("");
-        //   window.location.href = "/login";
-        //   ElMessage.error(data.msg);
-        //   return Promise.reject(data);
-        // }
-        // if (data.code && data.code !== ResultEnum.SECCESS) {
-        //   ElMessage.error(data.msg);
-        //   return Promise.reject(data);
-        // }
+        config.loading && tryHideFullScreenLoading();
+        // 登录失效
+        if (data.code == ResultEnum.OVERDUE) {
+          userStore.setToken("");
+          window.location.href = "/login";
+          ElMessage.error(data.msg);
+          return Promise.reject(data);
+        }
+        // 全局信息拦截
+        if (data.code && data.code !== ResultEnum.SECCESS) {
+          ElMessage.error(data.msg);
+          return Promise.reject(data);
+        }
         return data;
       },
       async (error: AxiosError) => {
         const { response } = error;
-        console.log("response", error);
-        // console.log("loading结束了");
+        tryHideFullScreenLoading();
         if (error.message.indexOf("timeout") !== -1)
           ElMessage.error("请求超时！请您稍后重试");
         if (error.message.indexOf("Network Error") !== -1)
           ElMessage.error("网络错误！请您稍后重试");
         if (response) checkStatus(response.status);
         if (!window.navigator.onLine) window.location.href = "/500";
-        // return Promise.reject(error);
+        return Promise.reject(error);
       }
     );
   }

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, onBeforeMount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import navigationTabs from "@/components/navigation-tabs/index.vue";
 import layoutContainer from "@/components/layout-container/index.vue";
@@ -12,6 +12,13 @@ import { useGlobalStore } from "@/stores/modules/jiewai-top-cms/global";
 import { useAliveTabsStore } from "@/stores/modules/jiewai-top-cms/alive-tabs";
 import { useTabsStore } from "@/stores/modules/jiewai-top-cms/tabs-menu";
 import { TabPaneName, TabsPaneContext } from "element-plus";
+import { user_logout } from "@/api/modules/login";
+import { useUserStore } from "@/stores/modules/user";
+import { dynamic_menu_get } from "@/api/modules/jiewai-top-cms";
+export interface HeaderItemType {
+  label: string;
+  callback: () => void;
+}
 
 const route = useRoute();
 const router = useRouter();
@@ -19,12 +26,37 @@ const router = useRouter();
 const globalStore = useGlobalStore();
 const isCollapse = computed(() => globalStore.isCollapse);
 const accordion = computed(() => globalStore.accordion);
+const userStore = useUserStore();
 // pinia获取keepalive状态
 const aliveTabsStore = useAliveTabsStore();
 const { aliveTabList } = storeToRefs(aliveTabsStore);
 // pinia获取tabs数据
 const tabsMenuStore = useTabsStore();
 const tabsMeunList = computed(() => tabsMenuStore.tabsMenuList);
+// header下拉框的列表
+const headerList: HeaderItemType[] = [
+  { label: "修改密码", callback: () => {} },
+  { label: "修改密钥", callback: () => {} },
+  { label: "退出", callback: () => handleUserLogout() }
+];
+
+onBeforeMount(async () => {
+  const res = await dynamic_menu_get();
+  if (res.code === 200) {
+    // clg
+  }
+});
+
+// 用户退出
+const handleUserLogout = async () => {
+  const res = await user_logout();
+  if (res.code === 200) {
+    userStore.setToken("");
+    userStore.setUserInfo(null);
+    window.localStorage.clear();
+    window.location.href = "/entrance/entry";
+  }
+};
 
 // 添加main顶部的tab导航
 const handleClickTab = (item: TabsPaneContext) => {
@@ -46,7 +78,7 @@ const handleRemoveTab = (path: TabPaneName) => {
 <template>
   <layout-container>
     <template #header>
-      <layout-header title="灵戒-CMS" />
+      <layout-header title="灵戒-CMS" :drop-list="headerList" />
     </template>
     <template #aside>
       <layout-asider-menu

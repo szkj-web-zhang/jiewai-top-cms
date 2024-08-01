@@ -1,122 +1,138 @@
 <script lang="ts" setup>
 import normalLogo from "@/assets/images/logo_normal.png";
-import { phoneNumberVerify } from "@/utils/verify-rules";
-import { reactive, ref, watch } from "vue";
-import { useRouter } from "vue-router";
+import { TabsPaneContext } from "element-plus";
+import { provide, reactive, ref, watch } from "vue";
+import methodTab from "~/entrance/components/method-tab/index.vue";
+import loginForm from "~/entrance/components/login-form/index.vue";
+import {
+  password_login_url,
+  user_info_get,
+  verifyCode_login_url
+} from "@/api/modules/login";
 import { useUserStore } from "@/stores/modules/user";
-import { verifyCode_get_url, verifyCode_login_url } from "@/api/modules/login";
-import customInput from "@/pages/entrance/components/custom-input/index.vue";
-import { FormInstance, FormRules } from "element-plus";
+import { useRouter } from "vue-router";
+export interface LoginData {
+  phone: string;
+  code: string;
+  password: string;
+}
 
 const router = useRouter();
+// token and user
 const userStore = useUserStore();
-
-const ruleFormRef = ref<FormInstance>();
-const phoneCheck = ref<null | boolean>(null);
-const codeCheck = ref<null | boolean>(true);
-const formData = reactive({
-  phone: "",
-  code: ""
+// 默认的tab
+const defaultTab = ref("code");
+// 激活的tab
+const activeTab = ref("code");
+// 验证码登录入口数据
+const formData = reactive<LoginData>({
+  phone: "17671644824",
+  code: "123456",
+  password: ""
 });
+const loading = ref(false);
 
-const handlePhoneCheck = (
-  _rules: any,
-  value: string,
-  callback: (str: Error) => void
-) => {
-  const passed = phoneNumberVerify(value);
-  if (value === "") {
-    callback(new Error("手机号不能为空"));
-  } else if (!passed) {
-    callback(new Error("手机号格式错误"));
-  } else {
-    phoneCheck.value = true;
+// 输入透传给el-form
+provide("formData", formData);
+provide("activeTab", activeTab);
+
+// 切换tab
+const handleTabClick = (tab: TabsPaneContext) => {
+  activeTab.value = tab.paneName as string;
+};
+
+// 获取用户信息
+const handleGetUserInfo = async () => {
+  const res = await user_info_get();
+  if (res.code === 200) {
+    userStore.setUserInfo(res.data);
+    router.push("/entry");
   }
 };
 
-const handleCodeCheck = (
-  _rules: any,
-  value: string,
-  callback: (str: Error) => void
-) => {
-  if (value === "") {
-    callback(new Error("验证码不能为空"));
-  } else if (value.length !== 6 && !codeCheck.value !== true) {
-    callback(new Error("验证码错误"));
+// 用户验证码登录
+const handleCodeLogin = async () => {
+  const params = { account: formData.phone, varificationCode: formData.code };
+  loading.value = true;
+  try {
+    const res = await verifyCode_login_url(params);
+    if (res.code === 200) {
+      userStore.setToken(res.data as string);
+      handleGetUserInfo();
+    }
+  } catch (error) {
+  } finally {
+    loading.value = false;
   }
 };
 
+// 用户账户密码登录
+const handlePasswordLogin = async () => {
+  const params = { account: formData.phone, password: formData.password };
+  try {
+    const res = await password_login_url(params);
+    if (res.code === 200) {
+      userStore.setToken(res.data as string);
+      handleGetUserInfo();
+    }
+  } catch (error) {
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 根据tab选择登录方式
 const handleLogin = async () => {
-  // const { data } = await verifyCode_login_url({
-  //   account: phoneNumber.value,
-  //   varificationCode: verifyCode.value
-  // });
-  // userStore.setToken(data);
-  // router.push("/entry");
+  if (activeTab.value === "code") {
+    handleCodeLogin();
+  } else {
+    handlePasswordLogin();
+  }
 };
-
-const rules = reactive<FormRules<typeof formData>>({
-  phone: [{ validator: handlePhoneCheck, trigger: "blur" }],
-  code: [{ validator: handleCodeCheck, trigger: "blur" }]
-});
 </script>
 
 <template>
   <div class="login-container">
-    <el-image style="width: 256px; height: 96px" :src="normalLogo" />
-    <el-container>
-      <el-header height="68px">登录系统</el-header>
-      <el-main>
-        <div class="login-qrcodeContent">
-          <div class="login-scanTips flex-center">
-            <svg-icon
-              name="scan"
-              class="scan-icon"
-              style="width: 21px; height: 21px"
-              fill="#08090A"
-            />
-            <span>实名DID登录</span>
-          </div>
-          <div class="login-qrcodePrint"></div>
-          <p class="login-qrcodeWarn">请使用 <span>DID</span> 扫码登录</p>
-          <el-button type="primary" color="#ffffff">刷新二维码</el-button>
-        </div>
-        <div class="login-formContent">
-          <div class="login-formTitle">手机号登录</div>
-          <div class="input-verify-box">
-            <el-form ref="ruleFormRef" :model="formData" :rules="rules">
-              <el-form-item prop="phone">
-                <el-input
-                  style="width: 100%; height: 54px"
-                  maxlength="11"
-                  placeholder="请输入手机号"
-                  v-model="formData.phone"
-                />
-              </el-form-item>
-              <el-form-item class="code-form" prop="code">
-                <el-input
-                  style="width: 268px; height: 54px"
-                  maxlength="11"
-                  placeholder="请输入验证码"
-                  v-model="formData.code"
-                />
-                <el-button class="code-button" color="#F0F4FA" type="info"
-                  >获取验证码</el-button
-                >
-              </el-form-item>
-            </el-form>
-          </div>
-          <el-button
-            class="login-button"
-            type="primary"
-            color="#1A7DFF"
-            @click="handleLogin"
-          >
-            登录
-          </el-button>
-        </div>
-      </el-main>
-    </el-container>
+    <div class="login-center-box">
+      <el-image :src="normalLogo" />
+      <div class="login-inner-box">
+        <p class="inner-title">登陆系统</p>
+        <el-row>
+          <el-col :span="8" class="inner-qrcode">
+            <div class="qrcode-title flex-center">
+              <svg-icon
+                name="scan"
+                style="width: 21px; height: 21px"
+                fill="#08090A"
+              />
+              <span>实名DID登录</span>
+            </div>
+            <div class="qrcode-print"></div>
+            <p class="qrcode-footer">请使用 <span>DID</span> 扫码登录</p>
+            <el-button type="primary" plain>刷新二维码</el-button>
+          </el-col>
+          <el-col :span="16" class="inner-form">
+            <method-tab v-model="defaultTab" @tab-click="handleTabClick">
+              <template #code v-if="activeTab === 'code'">
+                <login-form />
+              </template>
+              <template #password v-else>
+                <login-form />
+              </template>
+            </method-tab>
+            <el-button
+              class="login-button"
+              color="#1a7dff"
+              type="primary"
+              :loading="loading"
+              @click="handleLogin"
+            >
+              登录
+            </el-button>
+          </el-col>
+        </el-row>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -126,163 +142,138 @@ const rules = reactive<FormRules<typeof formData>>({
   min-height: 100%;
   background: url("../../../../assets/images/bg_normal.png") no-repeat center;
   background-size: cover;
-  display: flex;
-  align-items: center;
-  flex-flow: column nowrap;
   overflow: hidden;
+  position: relative;
 }
 
-.el-image {
-  margin: 158px 0 32px 0;
-}
-
-.el-container {
+.login-center-box {
   width: 720px;
-  max-height: 444px;
+  min-height: 572px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  top: 158px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  .el-image {
+    width: 256px;
+    height: 96px;
+  }
+}
+
+.login-inner-box {
+  width: 100%;
+  min-height: 444px;
+  height: 444px;
   background-color: #ffffff;
+  box-shadow: 0px 0px 20px 0px rgba(26, 125, 255, 0.08);
   border-radius: 20px;
-  .el-header {
+  > p {
+    width: 100%;
+    height: 68px;
     font-family: PingFangMedium;
     font-size: 24px;
     color: #08090a;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     border-bottom: 1px solid #ebedf0;
-  }
-  .el-main {
-    height: 356px;
-    display: flex;
-    flex-flow: row nowrap;
-    padding: 0 48px;
-    .el-button {
-      overflow: hidden;
-    }
+    line-height: 68px;
+    text-align: center;
   }
 }
 
-.login-qrcodeContent {
-  width: 160px;
-  height: 100%;
-  display: flex;
-  flex-flow: column nowrap;
+.el-row {
+  width: 100%;
+  height: calc(100% - 69px);
+  padding: 32px 48px 20px 16px;
+}
+
+.inner-qrcode {
+  text-align: center;
   position: relative;
-  align-items: center;
-  padding-right: 32px;
-  > .el-button {
-    width: 96px;
-    height: 40px;
-    font-family: PingFangMedium;
-    font-size: 16px;
-    color: #1a7dff;
-    border-radius: 8px;
-    border: 1px solid #1a7dff;
-  }
   &::after {
     content: "";
     width: 1px;
     height: 240px;
     background-color: #ebedf0;
     position: absolute;
+    top: 32px;
     right: 0;
-    top: 50%;
-    transform: translate(0, -56%);
+  }
+  .el-button {
+    width: auto;
+    height: 40px;
+    font-family: PingFangMedium;
+    font-size: 16px;
+    color: #1a7dff;
+    border-radius: 8px;
+    background-color: #ffffff;
+    transition: all 0.2s;
+    &:hover {
+      background-color: #c6e2ff;
+    }
   }
 }
 
-.login-scanTips {
+.qrcode-title {
+  height: 26px;
   margin-bottom: 18px;
-  margin-top: 32px;
   > span {
     font-family: PingFangMedium;
     font-size: 18px;
     color: #08090a;
+    margin-left: 8px;
   }
 }
 
-.scan-icon {
-  width: 22px;
-  height: 22px;
-  margin-right: 8px;
-}
-
-.login-qrcodePrint {
+.qrcode-print {
   width: 160px;
   height: 160px;
 }
 
-.login-qrcodeWarn {
+.qrcode-footer {
   height: 22px;
   font-family: PingFangMedium;
   font-size: 14px;
   color: #525b66;
   line-height: 22px;
-  margin-bottom: 18px;
+  text-align: center;
+  margin: 8px 0 18px 0;
   > span {
     color: #1a7dff;
   }
 }
 
-.login-formContent {
-  width: calc(100% - 192px);
-  height: 100%;
-  flex-flow: column nowrap;
-  align-items: start;
-  margin-left: 32px;
-}
-
-.login-formTitle {
-  width: 96px;
-  height: 38px;
-  font-family: PingFangMedium;
-  color: #1a7dff;
-  font-size: 16px;
-  border-bottom: 2px solid #1a7dff;
-  text-align: center;
-  line-height: 38px;
-  margin: 32px 0;
-}
-
-.input-verify-box {
-  width: 100%;
-  :deep(.el-input__wrapper) {
-    border-radius: 12px;
-    border: 1px solid #e1eaf5;
-    padding: 0 16px;
-    .el-input__inner {
-      font-size: 16px;
-      font-family: PingFangMedium;
-      color: #08090a;
-      border-color: var(borderColor);
-      &::placeholder {
-        font-family: PingFangRegular;
-        color: #7a8799;
-      }
+.inner-form {
+  padding-left: 32px;
+  :deep(.el-tabs__nav-wrap) {
+    &::after {
+      background-color: #ffffff !important;
     }
   }
-}
-
-.code-form {
-  margin-bottom: 32px;
-}
-
-.code-button {
-  height: 100%;
-  width: auto;
-  color: #08090a;
-  font-family: PingFangMedium;
-  min-width: 120px;
-  border-radius: 12px;
-  margin-left: 12px;
+  :deep(.el-tabs__item) {
+    color: #08090a;
+    font-size: 16px;
+    font-family: PingFangMedium;
+    &.is-active {
+      color: #1a7dff;
+      font-size: 16px;
+      font-family: PingFangMedium;
+    }
+  }
+  :deep(.el-tabs__header) {
+    margin-bottom: 32px !important;
+  }
 }
 
 .login-button {
   width: 100%;
   height: 56px;
-  font-family: PingFangMedium;
-  font-size: 16px;
   color: #ffffff;
+  font-family: PingFangMedium;
   font-size: 18px;
   border-radius: 12px;
+  overflow: hidden;
+  margin-top: 32px;
 }
 </style>

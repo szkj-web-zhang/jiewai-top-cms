@@ -1,9 +1,13 @@
 <script lang="ts" setup>
 import { useGlobalStore } from "@/stores/modules/jiewai-top-cms/global";
 import { computed } from "vue";
+import { HeaderItemType } from "../../views/main/home-page.vue";
 
 interface PropsType {
+  // header的title
   title: string;
+  // header的下拉框
+  dropList: HeaderItemType[];
 }
 
 const props = defineProps<PropsType>();
@@ -34,9 +38,13 @@ const handleCollapseChange = () => {
     </div>
     <template #dropdown>
       <el-dropdown-menu>
-        <el-dropdown-item>修改密码</el-dropdown-item>
-        <el-dropdown-item>修改密钥</el-dropdown-item>
-        <el-dropdown-item>退出</el-dropdown-item>
+        <el-dropdown-item
+          v-for="item in dropList"
+          :key="item.label"
+          @click="item.callback"
+        >
+          {{ item.label }}
+        </el-dropdown-item>
       </el-dropdown-menu>
     </template>
   </el-dropdown>
