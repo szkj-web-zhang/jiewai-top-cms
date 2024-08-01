@@ -16,9 +16,9 @@ const handleClickTab = (tab: TabsPaneContext) => {
     <el-tab-pane label="手机号登录" name="code">
       <slot name="code"></slot>
     </el-tab-pane>
-    <el-tab-pane label="账号密码登录" name="password"
-      ><slot name="password"></slot
-    ></el-tab-pane>
+    <el-tab-pane label="账号密码登录" name="password">
+      <slot name="password"></slot>
+    </el-tab-pane>
   </el-tabs>
 </template>
 

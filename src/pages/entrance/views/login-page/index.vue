@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import normalLogo from "@/assets/images/logo_normal.png";
 import { TabsPaneContext } from "element-plus";
-import { provide, reactive, ref, watch } from "vue";
+import { provide, reactive, ref } from "vue";
 import methodTab from "~/entrance/components/method-tab/index.vue";
 import loginForm from "~/entrance/components/login-form/index.vue";
 import {
@@ -26,8 +26,8 @@ const defaultTab = ref("code");
 const activeTab = ref("code");
 // 验证码登录入口数据
 const formData = reactive<LoginData>({
-  phone: "17671644824",
-  code: "123456",
+  phone: "",
+  code: "",
   password: ""
 });
 const loading = ref(false);
@@ -39,6 +39,9 @@ provide("activeTab", activeTab);
 // 切换tab
 const handleTabClick = (tab: TabsPaneContext) => {
   activeTab.value = tab.paneName as string;
+  formData.code = "";
+  formData.phone = "";
+  formData.password = "";
 };
 
 // 获取用户信息
@@ -83,11 +86,8 @@ const handlePasswordLogin = async () => {
 
 // 根据tab选择登录方式
 const handleLogin = async () => {
-  if (activeTab.value === "code") {
-    handleCodeLogin();
-  } else {
-    handlePasswordLogin();
-  }
+  if (activeTab.value === "code") handleCodeLogin();
+  else handlePasswordLogin();
 };
 </script>
 
@@ -114,10 +114,10 @@ const handleLogin = async () => {
           <el-col :span="16" class="inner-form">
             <method-tab v-model="defaultTab" @tab-click="handleTabClick">
               <template #code v-if="activeTab === 'code'">
-                <login-form />
+                <login-form key="code" />
               </template>
               <template #password v-else>
-                <login-form />
+                <login-form key="password" />
               </template>
             </method-tab>
             <el-button

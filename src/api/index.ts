@@ -45,6 +45,7 @@ class RequestHttp {
         // 控制请求是否需要显示loading
         config.loading ??= true;
         config.loading && showFullScreenLoading();
+        // 请求头携带token
         if (config.headers && typeof config.headers.set === "function") {
           config.headers.set(
             "satoken",
@@ -64,9 +65,11 @@ class RequestHttp {
         const userStore = useUserStore();
         axiosCanceler.removePending(config);
         config.loading && tryHideFullScreenLoading();
-        // 登录失效
+        // 登录失效清空所有本地存储
         if (data.code == ResultEnum.OVERDUE) {
           userStore.setToken("");
+          userStore.setUserInfo(null);
+          window.localStorage.clear();
           window.location.href = "/login";
           ElMessage.error(data.msg);
           return Promise.reject(data);
