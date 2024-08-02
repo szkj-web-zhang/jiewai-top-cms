@@ -3,7 +3,7 @@ import { useUserStore } from "@/stores/modules/user";
 import { routerModeSelect } from "@/utils/router-mode";
 
 const router = createRouter({
-  history: routerModeSelect("/entrance"),
+  history: routerModeSelect("entrance"),
   routes: [
     {
       path: "/",

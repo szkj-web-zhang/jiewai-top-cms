@@ -26,9 +26,9 @@ const defaultTab = ref("code");
 const activeTab = ref("code");
 // 验证码登录入口数据
 const formData = reactive<LoginData>({
-  phone: "",
-  code: "",
-  password: ""
+  phone: "17671644824",
+  code: "123456",
+  password: "Yl123456"
 });
 const loading = ref(false);
 

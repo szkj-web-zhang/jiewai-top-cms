@@ -2,6 +2,7 @@
 import { useGlobalStore } from "@/stores/modules/jiewai-top-cms/global";
 import { computed } from "vue";
 import { HeaderItemType } from "../../views/main/home-page.vue";
+import { useUserStore } from "@/stores/modules/user";
 
 interface PropsType {
   // header的title
@@ -15,6 +16,11 @@ const props = defineProps<PropsType>();
 // pinia获取menu折叠状态
 const globalStore = useGlobalStore();
 const isCollapse = computed(() => globalStore.isCollapse);
+// 获取用户信息
+const userStore = useUserStore();
+
+// 用户昵称
+const userName = computed(() => userStore.userInfo?.nickName ?? "admin");
 
 // pinia修改menu状态
 const handleCollapseChange = () => {
@@ -33,7 +39,7 @@ const handleCollapseChange = () => {
   </div>
   <el-dropdown :hide-on-click="true">
     <div class="header-float flex-center">
-      欢迎您:admin
+      欢迎您:{{ userName }}
       <el-icon size="18"><CaretBottom /></el-icon>
     </div>
     <template #dropdown>

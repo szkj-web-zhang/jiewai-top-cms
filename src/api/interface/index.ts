@@ -87,3 +87,20 @@ export namespace CMS {
     children?: DynamicMenuItem[];
   }
 }
+
+export namespace Syetem {
+  export interface DynamicMenuItem {
+    id: number;
+    parentId?: number;
+    name: string;
+    menuType: number; //菜单类型：1--目录；2-菜单；3-按钮
+    state: number; //状态：1-可用；0-不可用
+    orderNumber: number; //排序字段
+    perms: string; //权限标识
+    remark: string | null; //备注
+    path: string | null;
+    icon: string | null;
+    indexId: string;
+    children?: DynamicMenuItem[];
+  }
+}

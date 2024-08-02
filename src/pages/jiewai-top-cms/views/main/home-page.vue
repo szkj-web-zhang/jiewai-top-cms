@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, onBeforeMount } from "vue";
+import { computed, onBeforeMount, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import navigationTabs from "@/components/navigation-tabs/index.vue";
 import layoutContainer from "@/components/layout-container/index.vue";
@@ -14,7 +14,9 @@ import { useTabsStore } from "@/stores/modules/jiewai-top-cms/tabs-menu";
 import { TabPaneName, TabsPaneContext } from "element-plus";
 import { user_logout } from "@/api/modules/login";
 import { useUserStore } from "@/stores/modules/user";
-import { dynamic_menu_get } from "@/api/modules/jiewai-top-cms";
+import { CMS } from "@/api/interface";
+import { getHandleMenuList } from "@/utils/list-handler";
+import { dynamic_menu_get } from "@/api/modules/dynamic-menu";
 export interface HeaderItemType {
   label: string;
   callback: () => void;
@@ -33,6 +35,8 @@ const { aliveTabList } = storeToRefs(aliveTabsStore);
 // pinia获取tabs数据
 const tabsMenuStore = useTabsStore();
 const tabsMeunList = computed(() => tabsMenuStore.tabsMenuList);
+// 存储左侧menu
+const dynamicData = ref<CMS.DynamicMenuItem[]>();
 // header下拉框的列表
 const headerList: HeaderItemType[] = [
   { label: "修改密码", callback: () => {} },
@@ -41,10 +45,9 @@ const headerList: HeaderItemType[] = [
 ];
 
 onBeforeMount(async () => {
+  // 获取左侧菜单数据
   const res = await dynamic_menu_get();
-  if (res.code === 200) {
-    // clg
-  }
+  // dynamicData.value = res.data ?? [];
 });
 
 // 用户退出

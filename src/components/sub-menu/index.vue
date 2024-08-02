@@ -41,8 +41,8 @@ const handleItemClick = (item: Menu.MenuOptions) => {
 
 .el-sub-menu {
   :deep(.el-sub-menu__title) {
-    .business-icon {
-      margin-right: 10px;
+    > span {
+      padding-left: 10px;
     }
     &:hover {
       color: #ffffff !important;
@@ -82,8 +82,8 @@ const handleItemClick = (item: Menu.MenuOptions) => {
 }
 
 .el-menu-item {
-  .business-icon {
-    margin-right: 10px;
+  > span {
+    padding-left: 10px;
   }
   &:hover {
     color: #ffffff;

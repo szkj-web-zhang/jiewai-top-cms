@@ -1,8 +1,3 @@
-export interface EntryCmsItem {
-  name: string;
-  path: string;
-}
-
 export const menuList: Menu.MenuOptions[] = [
   {
     path: "/home",
@@ -462,6 +457,6 @@ export const menuList: Menu.MenuOptions[] = [
   }
 ];
 
-export const entryCmsList: EntryCmsItem[] = [
+export const entryCmsList = [
   { name: "jiewai-top-cms", path: "/jiewai-top-cms" }
 ];
