@@ -88,7 +88,7 @@ export namespace CMS {
   }
 }
 
-export namespace Syetem {
+export namespace System {
   export interface DynamicMenuItem {
     id: number;
     parentId?: number;

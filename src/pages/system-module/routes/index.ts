@@ -1,3 +1,4 @@
+import { useDynamicMuneStore } from "@/stores/modules/dynamic-menu";
 import { routerModeSelect } from "@/utils/router-mode";
 import { createRouter } from "vue-router";
 
@@ -23,6 +24,12 @@ const router = createRouter({
       ]
     }
   ]
+});
+
+router.beforeEach(async (to, from, next) => {
+  const dynamicMenuStore = useDynamicMuneStore();
+  await dynamicMenuStore.getDynamicMenuList("system:list");
+  next();
 });
 
 export default router;

@@ -1,4 +1,4 @@
-import { CMS } from "@/api/interface";
+import { System } from "@/api/interface";
 
 enum Path {
   // 系统模块入口
@@ -26,7 +26,7 @@ enum Path {
   "website:list" = "/website-module"
 }
 
-type DynamicFunc = (data?: CMS.DynamicMenuItem[]) => Menu.MenuOptions[];
+type DynamicFunc = (data?: System.DynamicMenuItem[]) => Menu.MenuOptions[];
 
 /**
  * 对接口返回的左侧菜单数据进行处理
@@ -52,12 +52,30 @@ export const getHandleMenuList: DynamicFunc = list => {
   return arr;
 };
 
+const pathTransform = (str: string) => {
+  return str.replaceAll(":", "/");
+};
+
 /**
  *
  */
 export const getHandleDynamicMenu: DynamicFunc = list => {
   const arr: Menu.MenuOptions[] = [];
-  console.log(list);
+  if (list) {
+    for (let i = 0; i < list.length; i++) {
+      arr[i] = {
+        path: pathTransform(list[i].perms),
+        name: list[i].perms,
+        meta: {
+          title: list[i].name,
+          isKeepAlive: true,
+          icon: list[i].icon ?? ""
+        },
+        children: getHandleMenuList(list[i].children)
+      };
+    }
+  }
+  console.log(arr);
   return arr;
 };
 

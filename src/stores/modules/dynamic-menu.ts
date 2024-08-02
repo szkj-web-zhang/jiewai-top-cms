@@ -20,8 +20,8 @@ export const useDynamicMuneStore = defineStore({
     async getDynamicMenuList(payload: string) {
       const res = await dynamic_menu_get();
       if (res.code === 200) {
-        // getHandleDynamicMenu()
-        console.log(res.data);
+        const list = res.data.filter(item => item.perms === payload);
+        getHandleDynamicMenu(list);
       }
     }
   }
